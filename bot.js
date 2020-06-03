@@ -2,6 +2,8 @@ const Discord = require('discord.js')
 const client = new Discord.Client()
 const ytdl = require('ytdl-core');
 const prefix = '!';
+const fetch = require("node-fetch");
+const api  = "AIzaSyAXXme78yMoN86fZBxMxhlre0Lq1Wootjk";
 bot_secret_token = "NzE3NjE2NzIwNDE1Njg2NjU2.Xtc7RA.Yeq1YHrQRnb-3B4gK2t9R9T-67E"
 
 client.login(bot_secret_token)
@@ -38,8 +40,21 @@ client.on('message', async message => {
 });
 
 const play = (message,connection) => {
-	const song_name = message.content.split(" ");
+	let vid;
+	let song_name = message.content.substring(6);
+	song_name = song_name.replace(/ /g,"%20");
+	console.log(song_name);
+	url = `https://www.googleapis.com/youtube/v3/search?q=${song_name}&key=${api}`;
+	console.log(url);
+	fetch(url)
+	.then(response => response.json())
+    .then(data => {
+    	console.log(data.items[0].id.videoId);
+    	vid = data.items[0].id.videoId;
+    	let link = `https://www.youtube.com/watch?v=${vid}`;
+		//console.log(link);
+		connection.play(ytdl(link, { filter: 'audioonly' }));
+    });
 	//song_name = song_name[]
 	console.log("started");
-	connection.play(ytdl('https://www.youtube.com/watch?v=QK8mJJJvaes', { filter: 'audioonly' }));
 }
