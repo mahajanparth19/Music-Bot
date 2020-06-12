@@ -8,6 +8,8 @@ bot_secret_token = "NzE3NjE2NzIwNDE1Njg2NjU2.Xtc7RA.Yeq1YHrQRnb-3B4gK2t9R9T-67E"
 
 client.login(bot_secret_token)
 
+let queue = [];
+let connection
 
 // client.on('message', (receivedMessage) => {
 // 	console.log(receivedMessage.author.toString())
@@ -28,18 +30,29 @@ client.login(bot_secret_token)
 // })
 
 client.on('message', async message => {
-	const connection = await message.member.voice.channel.join();
+	if(connection == undefined)
+		connection = await message.member.voice.channel.join();
+
 	if(message.content.startsWith(`${prefix}play`)){
-		play(message,connection);
+		insert(message,connection);
 	}
 	else if(message.content.startsWith(`${prefix}stop`)){
-		connection.dispatcher.end();
+		connection.dispatcher.destroy();
+		queue = [];
 	}
-    
+	else if(message.content.startsWith(`${prefix}skip`)){
+		skip(connection)
+	}
+	else if(message.content.startsWith(`${prefix}pause`)){
+		connection.dispatcher.pause();
+	}
+	else if(message.content.startsWith(`${prefix}resume`)){
+		connection.dispatcher.resume();
+	}
 
 });
 
-const play = (message,connection) => {
+const insert = (message,connection) => {
 	let vid;
 	let song_name = message.content.substring(6);
 	song_name = song_name.replace(/ /g,"%20");
@@ -48,13 +61,41 @@ const play = (message,connection) => {
 	console.log(url);
 	fetch(url)
 	.then(response => response.json())
-    .then(data => {
+    .then(async data => {
     	console.log(data.items[0].id.videoId);
     	vid = data.items[0].id.videoId;
+    	let songInfo = await ytdl.getInfo(vid);
+    	let title = songInfo.title;
     	let link = `https://www.youtube.com/watch?v=${vid}`;
-		//console.log(link);
-		connection.play(ytdl(link, { filter: 'audioonly' }));
+    	queue.push(link);
+    	console.log(queue);
+    	message.channel.send(title + " Added to queue")
+    	if(queue.length == 1){
+    		play(queue,connection);
+    	}
     });
-	//song_name = song_name[]
+}
+
+
+const play = (queue,connection) => {
 	console.log("started");
+	let link = queue[0];
+	const dispatcher = connection.play(ytdl(link, { filter: 'audioonly',highWaterMark: 1<<25 } , { highWaterMark: 1 }));
+
+	dispatcher.on('finish', () => {
+  		queue.shift();
+  		if(queue[0] !== undefined){
+  			play(queue,connection);
+  		}
+  		else{
+  			connection.dispatcher.destroy();
+  		}
+	});
+}
+
+const skip = (connection) =>{
+	queue.shift();
+  	if(queue[0] !== undefined){
+  		play(queue,connection);
+  	}
 }
