@@ -10,6 +10,7 @@ client.login(bot_secret_token)
 
 let queue = [];
 let connection
+let item = {};
 
 // client.on('message', (receivedMessage) => {
 // 	console.log(receivedMessage.author.toString())
@@ -41,7 +42,7 @@ client.on('message', async message => {
 		queue = [];
 	}
 	else if(message.content.startsWith(`${prefix}skip`)){
-		skip(connection)
+		skip(connection,message)
 	}
 	else if(message.content.startsWith(`${prefix}pause`)){
 		connection.dispatcher.pause();
@@ -67,19 +68,24 @@ const insert = (message,connection) => {
     	let songInfo = await ytdl.getInfo(vid);
     	let title = songInfo.title;
     	let link = `https://www.youtube.com/watch?v=${vid}`;
-    	queue.push(link);
+    	item.title = title;
+    	item.link = link;
+    	queue.push(item);
     	console.log(queue);
-    	message.channel.send(title + " Added to queue")
     	if(queue.length == 1){
-    		play(queue,connection);
+    		play(queue,connection,message);
+    	}
+    	else{
+    		message.channel.send(title + " Added to queue");
     	}
     });
 }
 
 
-const play = (queue,connection) => {
+const play = (queue,connection,message) => {
 	console.log("started");
-	let link = queue[0];
+	let link = queue[0].link;
+	message.channel.send("Currently Playing: " + queue[0].title);
 	const dispatcher = connection.play(ytdl(link, { filter: 'audioonly',highWaterMark: 1<<25 } , { highWaterMark: 1 }));
 
 	dispatcher.on('finish', () => {
@@ -93,9 +99,12 @@ const play = (queue,connection) => {
 	});
 }
 
-const skip = (connection) =>{
+const skip = (connection,message) =>{
 	queue.shift();
   	if(queue[0] !== undefined){
-  		play(queue,connection);
+  		play(queue,connection,message);
+  	}
+  	else{
+  		message.channel.send("Please add more songs");
   	}
 }
