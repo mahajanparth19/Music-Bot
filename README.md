@@ -5,7 +5,7 @@ It has the capability to Play, Pause, and to create a queue of songs
 
 <h2> Usage </h2>
 <ol>
-  <li> !play <SongName> </li> 
+  <li> !play SongName  </li> 
   <li> !stop </li>
   <li> !skip </li>
   <li> !pause </li>
