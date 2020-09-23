@@ -11,24 +11,6 @@ client.login(bot_secret_token)
 let queue = [];
 let connection
 
-// client.on('message', (receivedMessage) => {
-// 	console.log(receivedMessage.author.toString())
-//     // Prevent bot from responding to its own messages
-//     if (receivedMessage.author == client.user) {
-//         return
-//     }
-
-//     if(receivedMessage.author.toString() == "<@714470905757040691>"){
-// 	    receivedMessage.channel.send("Hii Matko")
-// 	}
-// else if(receivedMessage.author.toString() == "<@412279786480599050>"){
-// 	receivedMessage.channel.send("Hii Cartoon")
-// }
-// 	else{
-// 		receivedMessage.channel.send("Hii Unknown")
-// 	}
-// })
-
 client.on('message', async message => {
 	if(connection == undefined)
 		connection = await message.member.voice.channel.join();
