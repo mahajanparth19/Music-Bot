@@ -3,8 +3,8 @@ const client = new Discord.Client()
 const ytdl = require('ytdl-core');
 const prefix = '!';
 const fetch = require("node-fetch");
-const api  = "AIzaSyAXXme78yMoN86fZBxMxhlre0Lq1Wootjk";
-const bot_secret_token = "NzE3NjE2NzIwNDE1Njg2NjU2.Xtc7RA.Yeq1YHrQRnb-3B4gK2t9R9T-67E"
+const api  = "";
+const bot_secret_token = ""
 
 client.login(bot_secret_token)
 
